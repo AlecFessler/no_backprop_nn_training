@@ -10,7 +10,7 @@ The algorithm works through an evolutionary-inspired process:
 2. Create N copies of the current network
 3. For each copy, randomly perturb a subset of its weights using small normally-distributed adjustments
 4. Evaluate each network's performance on the training data
-5. Create a new network linear combination of all networks, where the combination scalars are determined by converting the inverse of the networks' losses into a probability distribution using softmax
+5. Create a new network as a linear combination of all networks, where the combination scalars are determined by converting the negation of the networks' losses into a probability distribution using softmax
 6. Use this new network as the starting point for the next iteration
 
 The key insight is that better-performing networks contribute more strongly to the next generation through the softmax-weighted averaging process. This creates selective pressure that guides the network toward better configurations without requiring any gradient computation.
