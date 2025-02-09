@@ -30,7 +30,7 @@ The entire training process uses only basic linear algebra and probability - no 
 
 When tested on MNIST using a simple CNN architecture, this training method achieved steady improvement in loss over hundreds of epochs, demonstrating that effective learning is possible without backpropagation:
 
-[Training curve plot will go here]
+![Training Curve](training_curve.png)
 
 ## Advantages and Limitations
 

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
@@ -82,6 +83,7 @@ class MnistModel(nn.Module):
 
     @staticmethod
     def train_model(model, train_loader, test_loader, criterion, epochs, device, N=10):
+        eval_losses = []
         for epoch in range(epochs):
             losses = [0] * N
             models = generate_model_copies(model, N, device)
@@ -101,9 +103,10 @@ class MnistModel(nn.Module):
             combination_scalars = linear_combination_scalars(losses)
             model = linear_combine_models(models, combination_scalars, device)
             eval_loss = MnistModel.evaluate_model(model, test_loader, criterion, device)
+            eval_losses.append(eval_loss)
             print("Epoch: {}/{} | Eval Loss: {:.4f}".format(epoch+1, epochs, eval_loss))
 
-        return model
+        return model, eval_losses
 
     @staticmethod
     def evaluate_model(model, test_loader, criterion, device):
@@ -123,12 +126,31 @@ def main():
     model = MnistModel().to(device)
 
     batch_size = 512
-    epochs = 500
+    epochs = 300
     criterion = nn.CrossEntropyLoss()
     train_loader, test_loader = MnistModel.get_dataloaders(batch_size, num_workers=2)
 
-    model = MnistModel.train_model(model, train_loader, test_loader, criterion, epochs, device, N=10)
+    model, eval_losses = MnistModel.train_model(model, train_loader, test_loader, criterion, epochs, device, N=10)
     MnistModel.save_model(model, 'Mnist_nobackprop.pth')
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(eval_losses, 'b-', label='Evaluation Loss')
+    plt.title('Training Curve without Backpropagation: MNIST Classification')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.grid(True)
+    plt.legend()
+    plt.style.use('seaborn-v0_8-darkgrid')
+    plt.annotate(f'Start: {eval_losses[0]:.3f}',
+                xy=(0, eval_losses[0]),
+                xytext=(10, 10),
+                textcoords='offset points')
+    plt.annotate(f'End: {eval_losses[-1]:.3f}',
+                xy=(len(eval_losses)-1, eval_losses[-1]),
+                xytext=(-10, 10),
+                textcoords='offset points')
+    plt.savefig('training_curve.png', dpi=300, bbox_inches='tight')
+    plt.close()
 
 if __name__ == "__main__":
     main()
